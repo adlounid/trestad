@@ -1,0 +1,28 @@
+import { requireAdminPage } from "../../lib/admin";
+import { listBookings } from "../../lib/bookings";
+import { AdminDashboard } from "./admin-dashboard";
+import { AdminSignOut } from "./admin-sign-out";
+
+export const dynamic = "force-dynamic";
+
+export default async function AdminPage() {
+  const admin = await requireAdminPage();
+  let bookings = [];
+  let storageError: string | null = null;
+
+  try {
+    bookings = await listBookings();
+  } catch (error) {
+    storageError = error instanceof Error ? error.message : "Kunde inte ansluta till lagringen.";
+  }
+
+  return (
+    <div className="admin-shell">
+      <header className="admin-header">
+        <div><a className="brand" href="/"><span className="brand-mark">3</span><span>STÄD</span></a><p>Administration · {admin.email}</p></div>
+        <AdminSignOut />
+      </header>
+      <AdminDashboard initialBookings={bookings} storageError={storageError} />
+    </div>
+  );
+}
