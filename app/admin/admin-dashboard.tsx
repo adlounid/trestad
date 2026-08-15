@@ -1,8 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import type { AdminBooking, BookingStatus, BookingUpdate } from "../../lib/bookings";
 import { formatSek } from "../../lib/pricing";
+import { AdminMail } from "./admin-mail";
 
 const statusLabels: Record<BookingStatus, string> = {
   new: "Ny", confirmed: "Bekräftad", completed: "Utförd", paid: "Betald",
@@ -27,6 +29,7 @@ function toEditable(booking: AdminBooking): EditableBooking {
 }
 
 export function AdminDashboard({ initialBookings, storageError }: { initialBookings: AdminBooking[]; storageError: string | null }) {
+  const [view, setView] = useState<"bookings" | "mail">(() => typeof window !== "undefined" && new URLSearchParams(window.location.search).get("view") === "mail" ? "mail" : "bookings");
   const [rows, setRows] = useState<EditableBooking[]>(initialBookings.map(toEditable));
   const [message, setMessage] = useState<string>("");
   const [exportError, setExportError] = useState<string>("");
@@ -90,9 +93,11 @@ export function AdminDashboard({ initialBookings, storageError }: { initialBooki
 
   return (
     <div className="admin-main">
+      <nav className="admin-tabs" aria-label="Administration"><button className={view === "bookings" ? "active" : ""} type="button" onClick={() => setView("bookings")}>Bokningar</button><button className={view === "mail" ? "active" : ""} type="button" onClick={() => setView("mail")}>Inkorg</button></nav>
+      {view === "mail" ? <AdminMail /> : <>
       <div className="admin-title-row">
         <div><p className="eyebrow">BOKNINGAR & RUT</p><h1>Överblick</h1><p>Bekräfta jobb, registrera betalning och skapa Skatteverkets XML-fil.</p></div>
-        <div className="admin-actions"><a className="admin-button" href="/">Visa kundsidan</a><button className="admin-button primary" type="button" onClick={downloadXml} disabled={exportableRows.length === 0}>Ladda ner RUT XML</button></div>
+        <div className="admin-actions"><Link className="admin-button" href="/">Visa kundsidan</Link><button className="admin-button primary" type="button" onClick={downloadXml} disabled={exportableRows.length === 0}>Ladda ner RUT XML</button></div>
       </div>
       <div className="admin-stats">
         <div className="admin-stat"><span>Nya förfrågningar</span><strong>{stats.newCount}</strong></div>
@@ -123,6 +128,7 @@ export function AdminDashboard({ initialBookings, storageError }: { initialBooki
           </table>
         </div>
       )}
+      </>}
     </div>
   );
 }

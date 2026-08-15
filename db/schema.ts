@@ -33,3 +33,14 @@ export const bookings = sqliteTable("bookings", {
 
 export type Booking = typeof bookings.$inferSelect;
 export type BookingStatus = Booking["status"];
+
+export const pushSubscriptions = sqliteTable("push_subscriptions", {
+  endpoint: text("endpoint").primaryKey(),
+  adminEmail: text("admin_email").notNull(),
+  expirationTime: integer("expiration_time"),
+  p256dh: text("p256dh").notNull(),
+  auth: text("auth").notNull(),
+  createdAt: text("created_at").notNull(),
+}, (table) => [
+  index("push_subscriptions_admin_email_idx").on(table.adminEmail),
+]);

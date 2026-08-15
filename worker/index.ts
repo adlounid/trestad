@@ -5,6 +5,7 @@ import handler from "vinext/server/app-router-entry";
 interface Env {
   ASSETS: Fetcher;
   DB: D1Database;
+  CRON_SECRET: string;
   IMAGES: {
     input(stream: ReadableStream): {
       transform(options: Record<string, unknown>): {
@@ -41,6 +42,18 @@ const worker = {
     }
 
     return handler.fetch(request, env, ctx);
+  },
+
+  async scheduled(_controller: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
+    const request = new Request("https://internal.3stad/api/admin/notifications/daily", {
+      method: "POST",
+      headers: { authorization: "Bearer " + env.CRON_SECRET },
+    });
+    ctx.waitUntil(handler.fetch(request, env, ctx).then(async (response) => {
+      if (!response.ok) {
+        throw new Error("Daglig inkorgsnotis misslyckades med status " + response.status + ": " + await response.text());
+      }
+    }));
   },
 };
 

@@ -1,8 +1,8 @@
-import { env } from "cloudflare:workers";
 import { drizzle } from "drizzle-orm/d1";
 import * as schema from "./schema";
 
 let databaseInitialized = false;
+let pushSubscriptionsInitialized = false;
 
 const bookingsTableSql = `
   CREATE TABLE IF NOT EXISTS bookings (
@@ -34,18 +34,44 @@ const bookingsTableSql = `
   )
 `;
 
-export function getDb() {
+async function getDatabaseBinding(): Promise<D1Database> {
+  const { env } = await import("cloudflare:workers");
   if (!env.DB) throw new Error("Databasbindningen DB saknas.");
-  return drizzle(env.DB, { schema });
+  return env.DB;
+}
+
+export async function getDb() {
+  return drizzle(await getDatabaseBinding(), { schema });
 }
 
 export async function ensureBookingsTable(): Promise<void> {
   if (databaseInitialized) return;
-  if (!env.DB) throw new Error("Databasbindningen DB saknas.");
-  await env.DB.batch([
-    env.DB.prepare(bookingsTableSql),
-    env.DB.prepare("CREATE INDEX IF NOT EXISTS bookings_status_idx ON bookings(status)"),
-    env.DB.prepare("CREATE INDEX IF NOT EXISTS bookings_payment_date_idx ON bookings(payment_date)"),
+  const database = await getDatabaseBinding();
+  await database.batch([
+    database.prepare(bookingsTableSql),
+    database.prepare("CREATE INDEX IF NOT EXISTS bookings_status_idx ON bookings(status)"),
+    database.prepare("CREATE INDEX IF NOT EXISTS bookings_payment_date_idx ON bookings(payment_date)"),
   ]);
   databaseInitialized = true;
+}
+
+const pushSubscriptionsTableSql = `
+  CREATE TABLE IF NOT EXISTS push_subscriptions (
+    endpoint TEXT PRIMARY KEY,
+    admin_email TEXT NOT NULL,
+    expiration_time INTEGER,
+    p256dh TEXT NOT NULL,
+    auth TEXT NOT NULL,
+    created_at TEXT NOT NULL
+  )
+`;
+
+export async function ensurePushSubscriptionsTable(): Promise<void> {
+  if (pushSubscriptionsInitialized) return;
+  const database = await getDatabaseBinding();
+  await database.batch([
+    database.prepare(pushSubscriptionsTableSql),
+    database.prepare("CREATE INDEX IF NOT EXISTS push_subscriptions_admin_email_idx ON push_subscriptions(admin_email)"),
+  ]);
+  pushSubscriptionsInitialized = true;
 }

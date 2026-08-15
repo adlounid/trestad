@@ -1,4 +1,5 @@
 import { requireAdminPage } from "../../lib/admin";
+import Link from "next/link";
 import { listBookings, type AdminBooking } from "../../lib/bookings";
 import { AdminDashboard } from "./admin-dashboard";
 import { AdminSignOut } from "./admin-sign-out";
@@ -19,7 +20,7 @@ export default async function AdminPage() {
   return (
     <div className="admin-shell">
       <header className="admin-header">
-        <div><a className="brand" href="/"><span className="brand-mark">3</span><span>STÄD</span></a><p>Administration · {admin.email}</p></div>
+        <div><Link className="brand" href="/"><span className="brand-mark">3</span><span>STÄD</span></Link><p>Administration · {admin.email}</p></div>
         <AdminSignOut />
       </header>
       <AdminDashboard initialBookings={bookings} storageError={storageError} />
