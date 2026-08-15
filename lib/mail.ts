@@ -55,9 +55,9 @@ function createImapClient(): ImapFlow {
     auth: mailCredentials(),
     logger: false,
     disableAutoIdle: true,
-    connectionTimeout: 15_000,
-    greetingTimeout: 15_000,
-    socketTimeout: 30_000,
+    connectionTimeout: 30_000,
+    greetingTimeout: 30_000,
+    socketTimeout: 90_000,
   });
 }
 
