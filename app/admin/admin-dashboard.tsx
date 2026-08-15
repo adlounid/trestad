@@ -115,7 +115,7 @@ export function AdminDashboard({ initialBookings, storageError }: { initialBooki
             <tbody>{rows.map((row) => (
               <tr key={row.id}>
                 <td className="customer-cell"><strong>{row.fullName}</strong><span>{row.address}, {row.postalCode} {row.city}</span><span>{row.email} · {row.phone}</span><span>PN: {row.personalNumber || "Ej RUT"} · {row.id}</span></td>
-                <td>{row.squareMeters} m²<br /><span className="status-chip">{row.requestedDate}</span>{row.notes ? <p>{row.notes}</p> : null}</td>
+                <td>{row.serviceLabel ?? "Flyttstädning"} · {row.squareMeters} {row.serviceType === "movingCleaning" || !row.serviceType ? "m²" : "tim"}<br /><span className="status-chip">{row.requestedDate}</span>{row.notes ? <p>{row.notes}</p> : null}</td>
                 <td><strong>{formatSek(row.customerTotal)}</strong><br /><small>RUT {formatSek(row.rutDeduction)}<br />Resa {formatSek(row.travelFee)}</small></td>
                 <td><select value={row.statusDraft} onChange={(event) => updateRow(row.id, "statusDraft", event.target.value as BookingStatus)}>{Object.entries(statusLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></td>
                 <td><input type="date" value={row.paymentDateDraft} onChange={(event) => updateRow(row.id, "paymentDateDraft", event.target.value)} /></td>

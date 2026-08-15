@@ -1,11 +1,11 @@
 import { decryptPersonalNumber, encryptPersonalNumber } from "./encryption";
 import { createFirestoreDocument, listFirestoreDocuments, updateFirestoreDocument } from "./firebase-firestore";
 import { isValidPersonalNumber, normalizePersonalNumber } from "./personal-number";
-import { calculatePrice, getDistanceForPostalCode, normalizePostalCode } from "./pricing";
+import { calculatePrice, getCleaningService, getDistanceForPostalCode, normalizePostalCode, type ServiceType } from "./pricing";
 
 export type CreateBookingInput = {
   fullName: string; email: string; phone: string; address: string; postalCode: string; city: string;
-  personalNumber: string; squareMeters: number; requestedDate: string; notes: string; consent: boolean; rutEnabled: boolean;
+  personalNumber: string; squareMeters: number; serviceType: ServiceType; requestedDate: string; notes: string; consent: boolean; rutEnabled: boolean;
 };
 
 export type BookingStatus = "new" | "confirmed" | "completed" | "paid" | "exported" | "cancelled";
@@ -23,6 +23,8 @@ type Booking = {
   personalNumberEncrypted: string;
   personalNumberLastFour: string;
   squareMeters: number;
+  serviceType: ServiceType;
+  serviceLabel: string;
   distanceKilometers: number;
   laborCost: number;
   travelFee: number;
@@ -64,8 +66,11 @@ function createBookingId(now: Date): string {
 
 export async function createBooking(input: CreateBookingInput): Promise<string> {
   if (!input.consent) throw new BookingValidationError("Du måste godkänna behandlingen av uppgifterna.");
-  if (!Number.isInteger(input.squareMeters) || input.squareMeters < 20 || input.squareMeters > 600) {
-    throw new BookingValidationError("Boytan måste vara mellan 20 och 600 m².");
+  const service = getCleaningService(input.serviceType);
+  const minimumQuantity = service.unit === "m²" ? 20 : 1;
+  const maximumQuantity = service.unit === "m²" ? 600 : 999;
+  if (!Number.isInteger(input.squareMeters) || input.squareMeters < minimumQuantity || input.squareMeters > maximumQuantity) {
+    throw new BookingValidationError(service.unit === "m²" ? "Boytan måste vara mellan 20 och 600 m²." : "Antal timmar måste vara mellan 1 och 999.");
   }
   const postalCode = normalizePostalCode(input.postalCode);
   if (postalCode.length !== 5) throw new BookingValidationError("Ange ett giltigt femsiffrigt postnummer.");
@@ -79,7 +84,7 @@ export async function createBooking(input: CreateBookingInput): Promise<string> 
   if (!/^\S+@\S+\.\S+$/.test(email)) throw new BookingValidationError("Ange en giltig e-postadress.");
   const now = new Date();
   const id = createBookingId(now);
-  const price = calculatePrice(input.squareMeters, distance.kilometers, input.rutEnabled);
+  const price = calculatePrice(input.serviceType, input.squareMeters, distance.kilometers, input.rutEnabled);
   await createFirestoreDocument("bookings", id, {
     id,
     createdAt: now.toISOString(),
@@ -93,6 +98,8 @@ export async function createBooking(input: CreateBookingInput): Promise<string> 
     personalNumberEncrypted: await encryptPersonalNumber(personalNumber),
     personalNumberLastFour: personalNumber.slice(-4),
     squareMeters: input.squareMeters,
+    serviceType: service.id,
+    serviceLabel: service.label,
     distanceKilometers: distance.kilometers,
     laborCost: price.laborCost,
     travelFee: price.travelFee,

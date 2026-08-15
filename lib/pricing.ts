@@ -1,5 +1,14 @@
 export type DistanceEstimate = { kilometers: number; label: string };
+export type ServiceType = "movingCleaning" | "recurringHomeCleaning" | "oneOffHomeCleaning" | "deepCleaning";
+export type CleaningService = { id: ServiceType; label: string; unit: "m²" | "tim"; priceBeforeRut: number };
 export type PriceBreakdown = { laborCost: number; travelFee: number; rutDeduction: number; customerTotal: number };
+
+export const CLEANING_SERVICES: Readonly<Record<ServiceType, CleaningService>> = {
+  movingCleaning: { id: "movingCleaning", label: "Flyttstädning", unit: "m²", priceBeforeRut: 59 },
+  recurringHomeCleaning: { id: "recurringHomeCleaning", label: "Hemstädning – regelbundet", unit: "tim", priceBeforeRut: 399 },
+  oneOffHomeCleaning: { id: "oneOffHomeCleaning", label: "Hemstädning – engångsjobb", unit: "tim", priceBeforeRut: 449 },
+  deepCleaning: { id: "deepCleaning", label: "Storstädning", unit: "tim", priceBeforeRut: 549 },
+};
 
 const DISTANCES: Readonly<Record<string, DistanceEstimate>> = {
   "250": { kilometers: 0, label: "Helsingborg" }, "251": { kilometers: 0, label: "Helsingborg" },
@@ -24,15 +33,20 @@ export function getDistanceForPostalCode(value: string): DistanceEstimate | null
   return DISTANCES[postalCode.slice(0, 3)] ?? null;
 }
 
-export function calculatePrice(squareMeters: number, kilometers: number, rutEnabled: boolean): PriceBreakdown {
-  const area = Number.isFinite(squareMeters) ? Math.max(0, Math.round(squareMeters)) : 0;
+export function getCleaningService(serviceType: ServiceType): CleaningService {
+  return CLEANING_SERVICES[serviceType];
+}
+
+export function calculatePrice(serviceType: ServiceType, quantity: number, kilometers: number, rutEnabled: boolean): PriceBreakdown {
+  const service = getCleaningService(serviceType);
+  const amount = Number.isFinite(quantity) ? Math.max(0, quantity) : 0;
   const distance = Number.isFinite(kilometers) ? Math.max(0, kilometers) : 0;
-  const laborCost = area * 56;
+  const laborCost = amount * service.priceBeforeRut;
   const travelFee = Math.round(distance * 1.2);
-  const rutDeduction = rutEnabled ? Math.round(laborCost * 0.5) : 0;
+  const rutDeduction = rutEnabled ? laborCost * 0.5 : 0;
   return { laborCost, travelFee, rutDeduction, customerTotal: laborCost + travelFee - rutDeduction };
 }
 
 export function formatSek(value: number): string {
-  return new Intl.NumberFormat("sv-SE").format(value) + " kr";
+  return new Intl.NumberFormat("sv-SE", { minimumFractionDigits: Number.isInteger(value) ? 0 : 2, maximumFractionDigits: 2 }).format(value) + " kr";
 }
