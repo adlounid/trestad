@@ -1,7 +1,4 @@
-import { env } from "cloudflare:workers";
-
 type RuntimeEnvironment = {
-  DB: D1Database;
   PII_ENCRYPTION_KEY?: string;
   ADMIN_EMAILS?: string;
   ADMIN_SESSION_SECRET?: string;
@@ -9,7 +6,12 @@ type RuntimeEnvironment = {
 };
 
 export function getRuntimeEnvironment(): RuntimeEnvironment {
-  return env as unknown as RuntimeEnvironment;
+  return {
+    ADMIN_EMAILS: process.env.ADMIN_EMAILS,
+    ADMIN_SESSION_SECRET: process.env.ADMIN_SESSION_SECRET,
+    FIREBASE_SERVICE_ACCOUNT_JSON: process.env.FIREBASE_SERVICE_ACCOUNT_JSON,
+    PII_ENCRYPTION_KEY: process.env.PII_ENCRYPTION_KEY,
+  };
 }
 
 export function requireRuntimeValue(name: "PII_ENCRYPTION_KEY" | "ADMIN_EMAILS" | "ADMIN_SESSION_SECRET"): string {

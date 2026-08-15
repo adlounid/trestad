@@ -25,9 +25,12 @@ function base64UrlEncode(value: Uint8Array): string {
   return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
 }
 
-function base64UrlDecode(value: string): Uint8Array {
+function base64UrlDecode(value: string): ArrayBuffer {
   const padded = value.replace(/-/g, "+").replace(/_/g, "/") + "=".repeat((4 - value.length % 4) % 4);
-  return Uint8Array.from(atob(padded), (character) => character.charCodeAt(0));
+  const decoded = Uint8Array.from(atob(padded), (character) => character.charCodeAt(0));
+  const bytes = new Uint8Array(decoded.byteLength);
+  bytes.set(decoded);
+  return bytes.buffer;
 }
 
 async function sessionKey(): Promise<CryptoKey> {

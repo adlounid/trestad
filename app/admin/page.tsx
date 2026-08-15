@@ -1,5 +1,5 @@
 import { requireAdminPage } from "../../lib/admin";
-import { listBookings } from "../../lib/bookings";
+import { listBookings, type AdminBooking } from "../../lib/bookings";
 import { AdminDashboard } from "./admin-dashboard";
 import { AdminSignOut } from "./admin-sign-out";
 
@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminPage() {
   const admin = await requireAdminPage();
-  let bookings = [];
+  let bookings: AdminBooking[] = [];
   let storageError: string | null = null;
 
   try {

@@ -1,5 +1,3 @@
-import { env } from "cloudflare:workers";
-
 type ServiceAccount = {
   client_email: string;
   private_key: string;
@@ -24,7 +22,7 @@ type FirestoreListResponse = {
 };
 
 function getServiceAccount(): ServiceAccount {
-  const value = env.FIREBASE_SERVICE_ACCOUNT_JSON?.trim();
+  const value = process.env.FIREBASE_SERVICE_ACCOUNT_JSON?.trim();
   if (!value) throw new Error("Firebase är inte konfigurerat.");
 
   try {
@@ -44,9 +42,12 @@ function base64Url(value: Uint8Array): string {
   return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
 }
 
-function pemToBytes(value: string): Uint8Array {
+function pemToBytes(value: string): ArrayBuffer {
   const base64 = value.replace(/-----BEGIN PRIVATE KEY-----|-----END PRIVATE KEY-----|\s/g, "");
-  return Uint8Array.from(atob(base64), (character) => character.charCodeAt(0));
+  const decoded = Uint8Array.from(atob(base64), (character) => character.charCodeAt(0));
+  const bytes = new Uint8Array(decoded.byteLength);
+  bytes.set(decoded);
+  return bytes.buffer;
 }
 
 async function createAccessToken(account: ServiceAccount): Promise<string> {
@@ -70,7 +71,7 @@ async function createAccessToken(account: ServiceAccount): Promise<string> {
   const signature = await crypto.subtle.sign(
     "RSASSA-PKCS1-v1_5",
     key,
-    new TextEncoder().encode(signingInput),
+    new TextEncoder().encode(signingInput).buffer,
   );
   const assertion = signingInput + "." + base64Url(new Uint8Array(signature));
   const response = await fetch(account.token_uri, {

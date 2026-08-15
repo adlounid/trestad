@@ -1,7 +1,13 @@
 import { requireRuntimeValue } from "./runtime";
 
-function decodeBase64(value: string): Uint8Array {
-  return Uint8Array.from(atob(value), (character) => character.charCodeAt(0));
+function toArrayBuffer(value: Uint8Array): ArrayBuffer {
+  const bytes = new Uint8Array(value.byteLength);
+  bytes.set(value);
+  return bytes.buffer;
+}
+
+function decodeBase64(value: string): ArrayBuffer {
+  return toArrayBuffer(Uint8Array.from(atob(value), (character) => character.charCodeAt(0)));
 }
 
 function encodeBase64(value: Uint8Array): string {
@@ -11,18 +17,18 @@ function encodeBase64(value: Uint8Array): string {
 }
 
 async function importEncryptionKey(): Promise<CryptoKey> {
-  const keyBytes = decodeBase64(requireRuntimeValue("PII_ENCRYPTION_KEY"));
-  if (keyBytes.byteLength !== 32) throw new Error("PII_ENCRYPTION_KEY måste vara en base64-kodad 256-bitarsnyckel.");
-  return crypto.subtle.importKey("raw", keyBytes, { name: "AES-GCM" }, false, ["encrypt", "decrypt"]);
+  const keyBuffer = decodeBase64(requireRuntimeValue("PII_ENCRYPTION_KEY"));
+  if (keyBuffer.byteLength !== 32) throw new Error("PII_ENCRYPTION_KEY måste vara en base64-kodad 256-bitarsnyckel.");
+  return crypto.subtle.importKey("raw", keyBuffer, { name: "AES-GCM" }, false, ["encrypt", "decrypt"]);
 }
 
 export async function encryptPersonalNumber(value: string): Promise<string> {
   if (!value) return "";
   const initializationVector = crypto.getRandomValues(new Uint8Array(12));
   const encrypted = await crypto.subtle.encrypt(
-    { name: "AES-GCM", iv: initializationVector },
+    { name: "AES-GCM", iv: toArrayBuffer(initializationVector) },
     await importEncryptionKey(),
-    new TextEncoder().encode(value),
+    toArrayBuffer(new TextEncoder().encode(value)),
   );
   return "v1." + encodeBase64(initializationVector) + "." + encodeBase64(new Uint8Array(encrypted));
 }
