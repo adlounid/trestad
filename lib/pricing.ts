@@ -27,7 +27,7 @@ export function getDistanceForPostalCode(value: string): DistanceEstimate | null
 export function calculatePrice(squareMeters: number, kilometers: number, rutEnabled: boolean): PriceBreakdown {
   const area = Number.isFinite(squareMeters) ? Math.max(0, Math.round(squareMeters)) : 0;
   const distance = Number.isFinite(kilometers) ? Math.max(0, kilometers) : 0;
-  const laborCost = area * 34;
+  const laborCost = area * 56;
   const travelFee = Math.round(distance * 1.2);
   const rutDeduction = rutEnabled ? Math.round(laborCost * 0.5) : 0;
   return { laborCost, travelFee, rutDeduction, customerTotal: laborCost + travelFee - rutDeduction };

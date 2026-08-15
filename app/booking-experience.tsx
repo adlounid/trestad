@@ -64,11 +64,11 @@ export function BookingExperience() {
           <h1>Rent hemma.<br /><em>Klart pris.</em></h1>
           <p className="hero-lead">Lokal flytt och hemstädning utan krångliga paket. Du betalar per kvadratmeter, ser hela uträkningen direkt och väljer själv när det passar.</p>
           <div className="hero-actions"><a className="button button-dark" href="#boka">Räkna ditt pris</a><a className="text-link" href="#sa-fungerar-det">Se vad som ingår <span>→</span></a></div>
-          <div className="hero-facts"><div><strong>17 kr</strong><span>per m² efter RUT</span></div><div><strong>50 %</strong><span>RUT på arbetet</span></div><div><strong>1,20 kr</strong><span>per km utanför stan</span></div></div>
+          <div className="hero-facts"><div><strong>28 kr</strong><span>per m² efter RUT</span></div><div><strong>50 %</strong><span>RUT på arbetet</span></div><div><strong>1,20 kr</strong><span>per km utanför stan</span></div></div>
         </div>
         <div className="hero-card">
           <div className="hero-card-top"><span>Exempel</span><span>75 m² · Helsingborg</span></div>
-          <div className="price-stamp"><span>Efter RUT</span><strong>1 275</strong><small>kronor</small></div>
+          <div className="price-stamp"><span>Efter RUT</span><strong>2 100</strong><small>kronor</small></div>
           <div className="room-lines" aria-hidden="true"><span className="room room-one" /><span className="room room-two" /><span className="room room-three" /><span className="spark spark-one">✦</span><span className="spark spark-two">✦</span></div>
           <p>Inga dolda startavgifter. Utkörning tillkommer bara utanför Helsingborg.</p>
         </div>
@@ -91,7 +91,7 @@ export function BookingExperience() {
           <div className="rut-toggle-row"><div><strong>RUT-avdrag</strong><span>50 % på arbetskostnaden</span></div><button className={"toggle " + (rutEnabled ? "active" : "")} type="button" role="switch" aria-checked={rutEnabled} onClick={() => setRutEnabled((value) => !value)}><span /></button></div>
           {booking.postalCode.length >= 3 && !distance ? <p className="distance-warning">Vi kör i nordvästra Skåne. Kontrollera postnumret eller kontakta oss för pris utanför området.</p> : null}
           <div className="price-breakdown">
-            <div><span>Städning, {squareMeters} m² × 34 kr</span><strong>{formatSek(price.laborCost)}</strong></div>
+            <div><span>Städning, {squareMeters} m² × 56 kr</span><strong>{formatSek(price.laborCost)}</strong></div>
             <div><span>Utkörning {distance?.label ?? "utanför området"}</span><strong>{price.travelFee === 0 ? "0 kr" : formatSek(price.travelFee)}</strong></div>
             {rutEnabled ? <div className="rut-line"><span>Preliminärt RUT-avdrag</span><strong>−{formatSek(price.rutDeduction)}</strong></div> : null}
           </div>
