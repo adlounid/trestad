@@ -39,8 +39,8 @@ export class MailConfigurationError extends Error {
 function mailCredentials(): { user: string; pass: string } {
   try {
     return {
-      user: requireRuntimeValue("STRATO_EMAIL"),
-      pass: requireRuntimeValue("STRATO_EMAIL_PASSWORD"),
+      user: requireRuntimeValue("STRATO_MAIL_USER"),
+      pass: requireRuntimeValue("STRATO_MAIL_PASSWORD"),
     };
   } catch (error) {
     throw new MailConfigurationError(error instanceof Error ? error.message : "Strato-kontot är inte konfigurerat.");
