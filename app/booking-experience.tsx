@@ -134,7 +134,7 @@ export function BookingExperience() {
       </section>
 
       <section className="local-section"><div className="local-badge">56°03′N<br />12°42′E</div><div><p className="eyebrow">HEMMA I HELSINGBORG</p><h2>Nära till hands.<br />Noggranna på plats.</h2><p>Vi utgår från Helsingborg och arbetar i hela nordvästra Skåne. För adresser utanför staden syns utkörningen tydligt i priset.</p></div></section>
-      <footer><div className="footer-brand"><span className="brand-mark">3</span><span>STÄD</span></div><p>Lokal flytt och hemstädning i Helsingborg med raka besked.</p><div className="footer-links"><a href="mailto:info@stadtre.se">info@stadtre.se</a><a href="#boka">Boka städning</a><a href="/admin">Admin</a></div><small>© 2026 3 Städ · Helsingborg</small></footer>
+      <footer><div className="footer-brand"><span className="brand-mark">3</span><span>STÄD</span></div><p>Lokal flytt och hemstädning i Helsingborg med raka besked.</p><div className="footer-links"><a href="tel:+46735680680">073 568 06 80</a><a href="mailto:info@stadtre.se">info@stadtre.se</a><a href="#boka">Boka städning</a><a href="/admin">Admin</a></div><small>© 2026 3 Städ · Helsingborg</small></footer>
     </main>
   );
 }
