@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { TrialLock } from "./trial-lock";
 
 export const metadata: Metadata = {
   title: "3 Städ Helsingborg",
@@ -10,5 +11,6 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="sv"><body>{children}</body></html>;
+  const siteLocked = process.env.SITE_ACCESS_LOCKED !== "false";
+  return <html lang="sv"><body>{siteLocked ? <TrialLock invoicePaymentUrl={process.env.INVOICE_PAYMENT_URL} /> : children}</body></html>;
 }
